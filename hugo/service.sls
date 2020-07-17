@@ -3,4 +3,6 @@ nginx_service:
     - name: nginx
     - enable: True
     - require:
-      - pkg: nginx_pkg
+      - file: nginx_symlink
+    - watch:
+      - file: nginx_config
