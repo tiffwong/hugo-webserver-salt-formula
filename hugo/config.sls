@@ -75,3 +75,30 @@ build_script:
       - file: build_script
       - cmd: hugo_site_repo
       - file: nginx_document_root
+
+webhook_systemd_unit:
+  file.managed:
+    - name: '/etc/systemd/system/webhook.service'
+    - source: salt://hugo/files/webhook.service
+    - user: root
+    - group: root
+    - mode: 0644
+    - template: jinja
+    - require:
+      - pkg: webhook_pkg
+  module.run:
+    - name: service.systemctl_reload
+    - onchanges:
+      - file: webhook_systemd_unit
+
+webhook_config:
+  file.managed:
+    - name: '/etc/webhook.conf'
+    - source: salt://hugo/files/webhook.conf
+    - user: root
+    - group: {{ pillar['hugo_deployment_data']['group'] }}
+    - mode: 0640
+    - template: jinja
+    - require:
+      - pkg: webhook_pkg
+      - group: hugo_group
